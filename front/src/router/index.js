@@ -6,7 +6,7 @@ import IndexView from '@/views/IndexView.vue';
 const routes = [
   {path: '/', component: IndexView},
   { path: '/create', component: PollCreateView },
-  { path: '/poll/:code', component: PollView },
+  { path: '/poll/:code', component: PollView, props: true},
 ];
 
 const router = createRouter({

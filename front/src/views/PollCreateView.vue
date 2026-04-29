@@ -19,7 +19,6 @@
                         <v-card-text>
                             <v-form 
                                 class="poll-create__form"
-                                @submit.prevent="submit"
                             >
                                 <v-text-field
                                     v-model="form.title"
@@ -45,10 +44,11 @@
                                 Очистить
                             </v-btn>
                             <v-btn
-                                type="submit"
                                 color="primary"
                                 size="large"
                                 prepend-icon="mdi-content-save-outline"
+                                :disabled="!valid"
+                                @click="submit"
                             >
                                 Сохранить опрос
                             </v-btn>
@@ -61,13 +61,18 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PollOptionsEditor from '@/components/PollOptionsEditor.vue';
+import { useApi } from '@/composables/useApi';
+import { useRouter } from 'vuetify/lib/composables/router';
+
+const router = useRouter();
+const api = useApi();
 
 const createFormState = () => ({
     title: '',
-    options: [{ text: '' }, { text: '' }],
+    options: [],
 });
 
 const form = reactive(createFormState());
@@ -77,8 +82,21 @@ const resetForm = () => {
 };
 
 const submit = async () => {
-
+    try {
+        const { data } = await api.post('/polls', {
+            title: form.title,
+            options: form.options.map((option) => option.text.trim()),
+        });
+        router.push(`/poll/${data.code}`)
+    } catch(e) {
+        console.error('Ошибка при создании запроса: ', e.message);
+    }
 };
+
+const valid = computed(() => {
+    const optValues = form.options.map((option) => option.text);
+    return form.title && (form.options.length >= 2 && form.options.length <= 4) && optValues.every(Boolean);
+});
 </script>
 
 <style scoped>

@@ -4,11 +4,11 @@
             <div>
                 <h3 class="text-h6">Варианты ответа</h3>
                 <p class="text-body-2 text-medium-emphasis">
-                    Добавьте минимум два варианта, чтобы участники могли выбрать ответ.
+                    Добавьте варианты ответа для участников опроса.
                 </p>
             </div>
             <v-chip color="primary" variant="tonal">
-                {{ localOptions.length }} шт.
+                {{ localOptions.length }}
             </v-chip>
         </div>
 
@@ -47,6 +47,7 @@
                 prepend-icon="mdi-plus"
                 color="primary"
                 variant="tonal"
+                :disabled="!canAdd"
                 @click="addOption"
             >
                 Добавить вариант
@@ -56,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
     modelValue: {
@@ -81,14 +82,12 @@ const toOption = (item) => {
     };
 };
 
-const createInitial = () => {
-    const items = props.modelValue.length
-        ? props.modelValue.map((item) => toOption(item))
-        : Array.from({ length: props.minOptions }, () => toOption({ text: '' }));
-    return items;
-};
+const toModelValue = (items) => items.map((item) => ({ text: item.text }));
+const isSameValue = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-const localOptions = ref(createInitial());
+const localOptions = ref(props.modelValue.map(toOption));
+
+const canAdd = computed(() => localOptions.value.length < 4);
 
 const addOption = () => {
     localOptions.value.push(toOption({ text: '' }));
@@ -102,12 +101,25 @@ const removeOption = (id) => {
 };
 
 watch(
+    () => props.modelValue,
+    (value) => {
+        const current = toModelValue(localOptions.value);
+        if (isSameValue(current, value)) {
+            return;
+        }
+        localOptions.value = value.map((item) => toOption(item));
+    },
+    { deep: true },
+);
+
+watch(
     localOptions,
     (value) => {
-        emit(
-            'update:modelValue',
-            value.map((item) => ({ text: item.text })),
-        );
+        const next = toModelValue(value);
+        if (isSameValue(next, props.modelValue)) {
+            return;
+        }
+        emit('update:modelValue', next);
     },
     { deep: true, immediate: true },
 );

@@ -10,4 +10,6 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('polls')->group(function () {
     Route::post('/', [PollController::class,'store']);
+    Route::get('/{code}', [PollController::class, 'show']);
+    Route::post('/{code}/vote', [PollController::class, 'vote']);
 });

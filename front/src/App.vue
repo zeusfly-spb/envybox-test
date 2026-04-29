@@ -11,5 +11,9 @@
     padding: 1.25rem;
     border-radius: 1rem;
     background: radial-gradient(circle at top left, #dbeafe, #f8fafc 45%, #eef2ff);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 </style>

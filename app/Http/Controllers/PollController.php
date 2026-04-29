@@ -40,8 +40,12 @@ class PollController extends Controller
      */
     public function show(string $code)
     {
-        $poll = Poll::with('options')->where('short_code', $code)->first();
-        return response()->json(new PollResource($poll));
+        // request()->server->set('REMOTE_ADDR', '1.10.15.15');
+        $poll = Poll::with('options', 'votes', 'votes.option')->where('short_code', $code)->first();
+        return response()->json([
+            'poll' => new PollResource($poll),
+            'voted' => !!$poll->votes->where('ip_address', request()->ip())->first()
+        ]);
     }
 
     /**
@@ -52,6 +56,7 @@ class PollController extends Controller
      */
     public function vote(Request $request, string $code)
     {
+        // $request->server->set('REMOTE_ADDR', '1.10.15.15');
         $poll = Poll::where('short_code', $code)->first();
         Vote::create([
             'poll_id' => $poll->id,

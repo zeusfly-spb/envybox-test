@@ -132,6 +132,7 @@ const getPoll = async () => {
         if (data.voted) {
             votesAfterSubmit.value = Array.isArray(data.poll.votes) ? data.poll.votes : [];
             store.commit('setVoteStatus', 'closed');
+            store.commit('setPollStatistics', resultRows.value);
         } else {
             store.commit('setVoteStatus', 'open');
         }
